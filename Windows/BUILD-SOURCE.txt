@@ -1,4 +1,4 @@
-Nexus HATS Desktop 1.0.0 - Windows source
+Nexus HATS Desktop 1.0.1 - Windows source
 
 Keep Windows, macOS and shared together. Both installers compile the common
 protection and pack-selection code and embed shared/hats-exclusions.json.

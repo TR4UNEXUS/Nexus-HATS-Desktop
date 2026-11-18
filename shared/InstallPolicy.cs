@@ -35,6 +35,17 @@ public static class InstallPolicy
         if (!IsPack(source)) throw new InvalidDataException("Incomplete HATS pack: atmosphere/package3, bootloader and switch are required.");
         var protectedPaths = new HashSet<string>(Catalog.Current.Defaults.Concat(NexusProtection.MandatoryPaths).Select(Paths.Key));
         foreach (var path in preserve ?? []) { Paths.ValidateRelative(path); protectedPaths.Add(Paths.Key(path)); }
+        // Include dynamic repair/recovery roots in the replacement plan so a
+        // parent cleanup or rollback cannot remove them. Inspect root names only.
+        foreach (var tree in new[] { source, sd })
+        {
+            var atmosphere = Paths.Checked(tree, "atmosphere");
+            if (Directory.Exists(atmosphere)) foreach (var item in Paths.Children(atmosphere))
+            {
+                var relative = Paths.Relative(tree, item);
+                if (NexusProtection.IsUsbLibraryData(relative)) protectedPaths.Add(Paths.Key(relative));
+            }
+        }
         bool Excluded(string path) => protectedPaths.Any(p => Paths.Under(Paths.Key(path), p));
         var modules = new Dictionary<string, string>();
         var packContents = Paths.Checked(source, "atmosphere/contents");

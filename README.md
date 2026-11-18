@@ -30,6 +30,13 @@ list is used. A network failure, invalid list or cancelled request stops before
 backup or SD changes. Nexus USB indexes and Manager settings remain protected even
 if the remote list is empty.
 
+USB game mappings in `atmosphere/usb_content`, HOME badge data in
+`atmosphere/usb_badges`, and the adjacent `usb_content-repair` journal/snapshots
+and `usb_content-recovery-*` folders are always preserved. These protections
+also apply when the online list is empty and when an installation rolls back.
+Incoming packs cannot supply replacement mappings or repair data, including
+on a fresh card. Both apps use the same rules and protection file.
+
 **HOC is updateable.** Its `atmosphere/kips/hoc.kip` and
 `atmosphere/contents/00FF0000636C6BFF` files can be replaced by a newer pack.
 Known sysmodules and other modules identified from their program metadata update

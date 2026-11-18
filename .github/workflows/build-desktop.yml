@@ -41,7 +41,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {runner: macos-15, rid: osx-arm64}
+          - {runner: macos-26, rid: osx-arm64}
           - {runner: macos-15-intel, rid: osx-x64}
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 25
@@ -86,7 +86,7 @@ jobs:
           retention-days: 30
   package:
     needs: build
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +117,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [macos-15, macos-15-intel]
+        runner: [macos-26, macos-15-intel]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 12
     steps:

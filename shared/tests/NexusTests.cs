@@ -47,6 +47,46 @@ public static class NexusTests
             foreach (var relative in protectedFiles) { Require(File.ReadAllText(Path.Combine(sd, relative)) == "keep user data"); Require(!File.Exists(Path.Combine(backup, relative))); }
             foreach (var relative in new[] { hoc + "/exefs.nsp", hoc + "/romfs/config.dat", "atmosphere/kips/hoc.kip", extra + "/romfs/resources.bin" }) { Require(File.ReadAllText(Path.Combine(sd, relative)) == "new module"); Require(File.ReadAllText(Path.Combine(backup, relative)) == "old module"); }
         });
+        test("USB maps, HOME badges and recovery journals survive upgrades even with an empty remote list", () => LibraryUpgrade(false));
+        test("Failed upgrades restore firmware without touching USB maps or their repair state", () => LibraryUpgrade(true));
+        test("A fresh SD card never receives someone else's USB library data from a HATS pack", () => {
+            var root = Scratch(); var source = Path.Combine(root, "pack"); var sd = Path.Combine(root, "sd");
+            Directory.CreateDirectory(Path.Combine(source, "switch")); Directory.CreateDirectory(Path.Combine(source, "bootloader")); Directory.CreateDirectory(sd);
+            Write(source, "atmosphere/package3", "new firmware");
+            foreach (var p in LibraryFiles) Write(source, p, "foreign library");
+            new Installer().Install(source, sd, Path.Combine(root, "backup"), []);
+            foreach (var p in LibraryFiles) Require(!File.Exists(Path.Combine(sd, p)));
+            Require(File.ReadAllText(Path.Combine(sd, "atmosphere/package3")) == "new firmware");
+        });
+    }
+    static readonly string[] LibraryFiles = [
+        "atmosphere/usb_content/title_map.bin", "atmosphere/usb_content/title_content_map.bin",
+        "atmosphere/usb_content/content_locations.bin", "atmosphere/usb_content/title_map.bin.bak",
+        "atmosphere/usb_content/title_content_map.bin.tmp", "atmosphere/usb_content/future/nested.bin",
+        "atmosphere/usb_badges/0100000000010000-0.ubg", "atmosphere/usb_badges/disabled",
+        "atmosphere/usb_content-repair.pending", "atmosphere/usb_content-repair-0123456789abcdef/journal.bin",
+        "atmosphere/usb_content-repair-0123456789abcdef/before/title_map.bin",
+        "atmosphere/usb_content-recovery-0123456789abcdef/quarantined.bin"
+    ];
+    static void LibraryUpgrade(bool fail)
+    {
+        var root = Scratch(); var source = Path.Combine(root, "pack"); var sd = Path.Combine(root, "sd"); var backup = Path.Combine(root, "backup");
+        Directory.CreateDirectory(Path.Combine(source, "switch")); Directory.CreateDirectory(Path.Combine(source, "bootloader"));
+        Write(source, "atmosphere/package3", "new firmware"); Write(sd, "atmosphere/package3", "old firmware");
+        foreach (var p in LibraryFiles) { Write(source, p, "stale pack data"); Write(sd, p, "current USB library\0\u00ff"); }
+        const string absent = "atmosphere/usb_content-recovery-ffffffffffffffff/new.bin";
+        Write(source, absent, "foreign recovery");
+        var plan = InstallPolicy.Plan(source, sd, []);
+        foreach (var p in LibraryFiles.Append(absent))
+            Require(!plan.Copy.Contains(p) && !plan.Replace.Any(r => Paths.Under(Paths.Key(p), Paths.Key(r))));
+        var installer = new Installer { CopyFile = (from, to) => { VerifiedFiles.Copy(from, to); if (fail) throw new IOException("Injected failure after write"); } };
+        bool failed = false;
+        try { installer.Install(source, sd, backup, []); }
+        catch (IOException e) when (fail && e.Message.Contains("previous files were restored")) { failed = true; }
+        Require(failed == fail);
+        foreach (var p in LibraryFiles) { Require(File.ReadAllText(Path.Combine(sd, p)) == "current USB library\0\u00ff"); Require(!File.Exists(Path.Combine(backup, p))); }
+        Require(!File.Exists(Path.Combine(sd, absent)));
+        Require(File.ReadAllText(Path.Combine(sd, "atmosphere/package3")) == (fail ? "old firmware" : "new firmware"));
     }
     static void Require(bool ok) { if (!ok) throw new Exception("Nexus regression check failed"); }
     static string Scratch() { var root = Environment.GetEnvironmentVariable("HATS_TEST_ROOT") ?? Path.GetTempPath(); var path = Path.Combine(root, "nexus-" + Guid.NewGuid().ToString("N")); Directory.CreateDirectory(path); return path; }

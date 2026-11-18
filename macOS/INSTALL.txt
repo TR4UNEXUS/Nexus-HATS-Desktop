@@ -1,4 +1,4 @@
-NEXUS HATS DESKTOP — macOS 1.0.0
+NEXUS HATS DESKTOP — macOS 1.0.1
 
 One app for Apple Silicon (M-series) and Intel Macs running macOS 14 or later.
 The .NET runtime is included. Python and .NET do not need to be installed.
@@ -37,7 +37,8 @@ HATS packs and the current protection list come from TR4UNEXUS/Nexus-USB-HATS.
 Protected games, ports and mods are skipped during backup, deletion and copy.
 HOC and identified sysmodules update with the selected pack, including their
 resource files. Game mods, cheats, USB library data and Manager settings stay
-protected. Windows and Mac use the same protection file. If the online file
+protected, along with USB HOME badges and repair/recovery files stored beside
+the mappings. Windows and Mac use the same protection file. If the online file
 does not exist, the included list is used; a connection error or invalid list
 stops before SD changes. The exact list is saved in the backup.
 

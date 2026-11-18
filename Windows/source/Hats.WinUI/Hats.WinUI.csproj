@@ -20,7 +20,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>app_icon.ico</ApplicationIcon>
     <AssemblyName>Nexus-HATS-Desktop.x64</AssemblyName>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Title>Nexus HATS Installer</Title>
     <Description>Nexus HATS Installer</Description>
     <Company>Nexus</Company>

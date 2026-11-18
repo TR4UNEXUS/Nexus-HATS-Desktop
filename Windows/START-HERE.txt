@@ -1,7 +1,9 @@
-Nexus HATS Desktop 1.0.0 - Windows
+Nexus HATS Desktop 1.0.1 - Windows
 
 Run Nexus-HATS-Desktop.x64.exe. Choose the SD card and a pack, then Install HATS.
 The app creates a verified backup before changing the card.
 The app includes its runtime; no separate .NET installation is needed.
+USB game mappings, HOME badges and repair/recovery files remain on your card.
+HOC and other identified sysmodules can still update with the chosen pack.
 
 Build instructions and the shared protection file are in the parent directory.

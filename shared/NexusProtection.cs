@@ -5,7 +5,18 @@ namespace Hats.Core;
 
 public static class NexusProtection
 {
-    public static readonly string[] MandatoryPaths = ["atmosphere/usb_content", "config/nexusmanager", "config/nexus-manager"];
+    public static readonly string[] MandatoryPaths = ["atmosphere/usb_content", "atmosphere/usb_badges",
+        "atmosphere/usb_content-repair.pending", "config/nexusmanager", "config/nexus-manager"];
+    // Repair/recovery snapshots are siblings of the live index directory. These
+    // namespaces belong to the current card, including incomplete transactions.
+    public static bool IsUsbLibraryData(string path)
+    {
+        var key = Paths.Key(path);
+        return Paths.Under(key, "atmosphere/usb_content") || Paths.Under(key, "atmosphere/usb_badges") ||
+            Paths.Under(key, "atmosphere/usb_content-repair.pending") ||
+            key.StartsWith("atmosphere/usb_content-repair-", StringComparison.Ordinal) ||
+            key.StartsWith("atmosphere/usb_content-recovery-", StringComparison.Ordinal);
+    }
     public static ExclusionSnapshot BundledSnapshot()
     {
         using var stream = typeof(NexusProtection).Assembly.GetManifestResourceStream("Hats.Core.hats-exclusions.json")

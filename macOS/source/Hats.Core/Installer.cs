@@ -76,6 +76,7 @@ public sealed class Installer
         if (Paths.FreeSpace(sd) < sizes.Sum(n => (n + 32767) / 32768 * 32768) + largest + reserve) throw new IOException("Not enough free space on the SD card to install safely.");
         cancel.ThrowIfCancellationRequested();
         log?.Invoke($"Updating {plan.Sysmodules.Length} identified HATS sysmodules. Games, mods, ports and console backups are protected.");
+        log?.Invoke("Keeping this card's USB game mappings, HOME badges and repair/recovery data.");
         foreach (var (path, reason) in plan.AutomaticallyPreserved.Take(20)) log?.Invoke($"Skipping {path}: {reason}.");
         if (plan.AutomaticallyPreserved.Count > 20) log?.Invoke($"{plan.AutomaticallyPreserved.Count - 20} more unrelated paths are protected.");
         Directory.CreateDirectory(backup);

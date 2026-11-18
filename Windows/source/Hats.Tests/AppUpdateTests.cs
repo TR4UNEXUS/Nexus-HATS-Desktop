@@ -147,8 +147,8 @@ static class AppUpdateTests
         var index = Array.IndexOf(args, "--app-exe");
         if (index >= 0 && args.Length > index + 1)
             test("Built app is an x64 executable with the expected updater identity and version", () => {
-                AppUpdateInstaller.VerifyExecutable(args[index + 1], new Version(1, 0, 0, 0));
-                Throws(() => AppUpdateInstaller.VerifyExecutable(args[index + 1], new Version(1, 0, 1, 0)));
+                AppUpdateInstaller.VerifyExecutable(args[index + 1], new Version(1, 0, 1, 0));
+                Throws(() => AppUpdateInstaller.VerifyExecutable(args[index + 1], new Version(1, 0, 2, 0)));
             });
         if (args.Contains("--live-app"))
             test("Public app update feed can be checked without credentials", () => {
