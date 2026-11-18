@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../../shared/*.cs" Link="Shared/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="../../../shared/catalog.json" LogicalName="Hats.Core.catalog.json" />
+    <EmbeddedResource Include="../../../shared/hats-exclusions.json" LogicalName="Hats.Core.hats-exclusions.json" />
+  </ItemGroup>
+</Project>

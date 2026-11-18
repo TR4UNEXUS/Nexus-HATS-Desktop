@@ -1,0 +1,22 @@
+outputs/
+**/bin/
+**/obj/
+**/application/
+**/.vs/
+**/verification/
+*.user
+*.keys
+keys.dat
+.DS_Store
+__pycache__/
+CONTENTS-SHA256.txt
+Windows/SHA256.txt
+Windows/verification.json
+# Older Python implementation retained locally from the supplied source archive.
+macOS/hats_installer.py
+macOS/build.ps1
+macOS/legacy/
+macOS/requirements.txt
+macOS/app_icon.*
+macOS/bmc_button.png
+macOS/sdcard_icon.png

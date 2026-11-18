@@ -1,0 +1,47 @@
+NEXUS HATS DESKTOP — macOS 1.0.0
+
+One app for Apple Silicon (M-series) and Intel Macs running macOS 14 or later.
+The .NET runtime is included. Python and .NET do not need to be installed.
+
+1. Open Nexus-HATS-Desktop-Universal.dmg.
+2. Drag Nexus HATS to Applications (or your own ~/Applications folder).
+3. Eject the disk image, then open the app from Applications.
+4. Connect a FAT32/exFAT SD card, choose it, and choose the HATS pack.
+   Both empty cards and existing installations are supported.
+5. Check the selected card and backup location before installing.
+
+The compact window has an always-open activity log. The log follows new
+activity automatically; Open saved log opens the full session history.
+Options, Info and Install HATS are at the bottom of the window.
+
+Backups default to ~/Desktop/NexusHATSBackups. Options lets you choose another
+folder. Existing custom backup locations are kept. The old default migrates
+to Desktop for new backups; existing backup files are not moved or removed.
+Logs, downloads and update logs: ~/Library/Application Support/NexusHATSDesktop/.
+
+App updates are checked at startup and through Options > Check for app updates.
+Updates come from TR4UNEXUS/Nexus-HATS-Desktop, separate from HATS card packs.
+Choose Update & restart to download, verify and replace the installed app.
+The previous app is retained alongside it as Nexus HATS.previous-*.app.
+The updater requires a writable Applications folder and cannot run from the
+mounted DMG. Updates are disabled while an SD operation is running.
+
+This build is ad-hoc signed, not Developer ID signed or notarized. macOS may
+require the standard per-app approval on first opening or after an update.
+Use System Settings > Privacy & Security > Open Anyway only for this app
+after checking the source. The updater preserves quarantine and never disables
+Gatekeeper. Automatic launch errors restore the previous app. Update logs
+are retained in Application Support/NexusHATSDesktop/Updates/*/update.log.
+
+HATS packs and the current protection list come from TR4UNEXUS/Nexus-USB-HATS.
+Protected games, ports and mods are skipped during backup, deletion and copy.
+HOC and identified sysmodules update with the selected pack, including their
+resource files. Game mods, cheats, USB library data and Manager settings stay
+protected. Windows and Mac use the same protection file. If the online file
+does not exist, the included list is used; a connection error or invalid list
+stops before SD changes. The exact list is saved in the backup.
+
+Options > Format SD card shows a red caution and opens macOS Disk Utility.
+HATS does not start an erase. Formatting erases every file and partition on
+the selected device and does not create a backup. Check the device in Disk
+Utility before erasing. Eject the SD card in Finder before unplugging it.

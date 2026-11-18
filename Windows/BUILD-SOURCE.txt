@@ -1,0 +1,20 @@
+Nexus HATS Desktop 1.0.0 - Windows source
+
+Keep Windows, macOS and shared together. Both installers compile the common
+protection and pack-selection code and embed shared/hats-exclusions.json.
+
+source/Hats.Core: installation, backups, archives, removable drives,
+                 formatting, releases, and application updates.
+source/Hats.WinUI: complete Windows UI, settings, icons and artwork.
+source/Hats.Tests: regression tests.
+
+Build on Windows with the .NET 10 SDK and internet access for NuGet restore:
+  powershell -File .\source\build.ps1
+
+Run the regression tests:
+  powershell -File .\source\test.ps1
+
+The build script writes the application into the application directory.
+NuGet dependencies are declared in the project files and restored by dotnet.
+START-HERE.txt describes the application and PUBLISHING-UPDATES.txt describes
+release requirements. The root README documents the combined build workflow.

@@ -1,0 +1,150 @@
+name: Build Nexus desktop installers
+on:
+  push:
+    branches: [main]
+    paths: ['Windows/source/**', 'macOS/source/**', 'macOS/packaging/**', 'shared/**', '.github/workflows/build-desktop.yml', 'macOS/INSTALL.txt']
+  pull_request:
+    paths: ['Windows/source/**', 'macOS/source/**', 'macOS/packaging/**', 'shared/**', '.github/workflows/build-desktop.yml', 'macOS/INSTALL.txt']
+  workflow_dispatch:
+defaults:
+  run:
+    working-directory: macOS
+permissions:
+  contents: read
+concurrency:
+  group: desktop-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Publish the standalone Windows installer
+        run: dotnet publish Windows/source/Hats.WinUI -c Release -p:Platform=x64 -o outputs/Windows
+      - name: Test Windows installation, protections and packaged updater identity
+        run: dotnet run --project Windows/source/Hats.Tests -c Release -- --app-exe outputs/Windows/Nexus-HATS-Desktop.x64.exe
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nexus-HATS-Desktop-Windows
+          path: outputs/Windows/Nexus-HATS-Desktop.x64.exe
+          retention-days: 90
+  build:
+    name: Test and build ${{ matrix.rid }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: macos-15, rid: osx-arm64}
+          - {runner: macos-15-intel, rid: osx-x64}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Retain test fixtures in this build workspace
+        run: |
+          mkdir -p "$RUNNER_TEMP/hats-tests"
+          echo "HATS_TEST_ROOT=$RUNNER_TEMP/hats-tests" >> "$GITHUB_ENV"
+      - name: Test protections, rollback and Mac card checks
+        run: dotnet run --project source/Hats.Mac.Tests -c Release
+      - name: Render and check compact window
+        run: dotnet run --project source/Hats.Mac.Tests -c Release -- --render
+      - name: Compile self-contained native app
+        run: dotnet publish source/Hats.Mac -c Release -r '${{ matrix.rid }}' --self-contained true -o '${{ runner.temp }}/publish'
+      - name: Check native mount API and app startup
+        run: |
+          "$RUNNER_TEMP/publish/Nexus.HATS.Desktop" --native-smoke
+          "$RUNNER_TEMP/publish/Nexus.HATS.Desktop" --startup-check "$RUNNER_TEMP/hats-tests/native-startup.json"
+      - name: Preserve executable permissions in build payload
+        run: |
+          mkdir -p "$RUNNER_TEMP/payload"
+          tar -czf "$RUNNER_TEMP/payload/${{ matrix.rid }}.tar.gz" -C "$RUNNER_TEMP/publish" .
+          template=$(find "$DOTNET_ROOT/packs" "$HOME/.nuget/packages" -path '*/runtimes/${{ matrix.rid }}/native/apphost' -type f | sort | tail -1)
+          test -n "$template"
+          cp "$template" "$RUNNER_TEMP/payload/apphost-template-${{ matrix.rid }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-${{ matrix.rid }}
+          path: ${{ runner.temp }}/payload/*
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: checks-${{ matrix.rid }}
+          path: |
+            ${{ runner.temp }}/hats-tests/*.png
+            ${{ runner.temp }}/hats-tests/*.json
+          retention-days: 30
+  package:
+    needs: build
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: runtime-*
+          merge-multiple: true
+          path: ${{ runner.temp }}/inputs
+      - run: python -m pip install ds_store==1.3.1
+      - name: Create universal app and real compressed DMG
+        run: python packaging/build-universal.py --inputs "$RUNNER_TEMP/inputs" --output "$RUNNER_TEMP/universal"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: universal-dmg-candidate
+          path: |
+            ${{ runner.temp }}/universal/Nexus-HATS-Desktop-Universal.dmg
+            ${{ runner.temp }}/universal/SHA256.txt
+            ${{ runner.temp }}/universal/INSTALL.txt
+          retention-days: 14
+  verify:
+    needs: package
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [macos-15, macos-15-intel]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: universal-dmg-candidate
+          path: ${{ runner.temp }}/dmg
+      - name: Launch exact DMG natively on this Mac
+        run: python3 packaging/verify-dmg.py "$RUNNER_TEMP/dmg/Nexus-HATS-Desktop-Universal.dmg" "$RUNNER_TEMP/verified"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packaged-startup-${{ matrix.runner }}
+          path: |
+            ${{ runner.temp }}/verified/startup.json
+            ${{ runner.temp }}/verified/update-check/update-validation.json
+          retention-days: 30
+  deliver:
+    needs: [verify, windows]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: universal-dmg-candidate
+          path: ready
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Nexus-HATS-Desktop-Universal-macOS
+          path: ready/*
+          retention-days: 90

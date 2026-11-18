@@ -1,0 +1,3 @@
+Nexus HATS Desktop 1.0.0
+
+See README.md for Windows and Mac instructions. Both apps use shared/hats-exclusions.json.
