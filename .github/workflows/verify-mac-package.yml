@@ -1,0 +1,49 @@
+name: Verify an existing Mac package
+on:
+  workflow_dispatch:
+    inputs:
+      build_run:
+        description: Build workflow run containing universal-dmg-candidate
+        required: true
+        type: string
+      source_commit:
+        description: Exact source commit used by that build
+        required: true
+        type: string
+      runner:
+        description: Native Mac runner
+        required: true
+        default: macos-26
+        type: choice
+        options: [macos-26, macos-15, macos-15-intel]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  verify:
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_commit }}
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: ${{ inputs.build_run }}
+          name: universal-dmg-candidate
+          path: ${{ runner.temp }}/dmg
+      - name: Verify exact package checksum
+        working-directory: ${{ runner.temp }}/dmg
+        run: shasum -a 256 -c SHA256.txt
+      - name: Launch packaged app and validate updates
+        working-directory: macOS
+        run: python3 packaging/verify-dmg.py "$RUNNER_TEMP/dmg/Nexus-HATS-Desktop-Universal.dmg" "$RUNNER_TEMP/verified"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packaged-startup-${{ inputs.runner }}
+          path: |
+            ${{ runner.temp }}/verified/startup.json
+            ${{ runner.temp }}/verified/update-check/update-validation.json
+          if-no-files-found: error
+          retention-days: 90
