@@ -77,6 +77,8 @@ not Apple Developer ID signed or notarised. See `macOS/INSTALL.txt`.
 
 If Nexus has been useful to you, consider [buying me a coffee](https://www.buymeacoffee.com/TechRepairs4u). Your support gives me more time to build new features and test fixes. Thanks for supporting my work!
 
+<a href="https://www.buymeacoffee.com/TechRepairs4u"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" width="217" height="60"></a>
+
 ## Source and credits
 
 Based on the supplied complete Magic Monkei HATS source archive: Windows 2.1.8
