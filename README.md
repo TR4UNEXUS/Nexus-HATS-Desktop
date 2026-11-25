@@ -73,6 +73,10 @@ Mac packaging uses `lipo`, `codesign` and `hdiutil`, so producing and verifying 
 DMG needs a Mac or the macOS workflow. The default build is ad-hoc signed; it is
 not Apple Developer ID signed or notarised. See `macOS/INSTALL.txt`.
 
+## Support Nexus
+
+If Nexus has been useful to you, consider [buying me a coffee](https://www.buymeacoffee.com/TechRepairs4u). Your support gives me more time to build new features and test fixes. Thanks for supporting my work!
+
 ## Source and credits
 
 Based on the supplied complete Magic Monkei HATS source archive: Windows 2.1.8
